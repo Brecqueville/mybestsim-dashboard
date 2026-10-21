@@ -35,6 +35,8 @@ def build_stats(products: pd.DataFrame) -> dict:
         "unlimited": unlimited_stats(products),
     }
     stats["insights"] = insights(stats)
+    stats["headlines"] = headlines(stats)
+    stats["takeaways"] = takeaways(stats)
     return stats
 
 
@@ -57,6 +59,8 @@ def kpis(df: pd.DataFrame) -> dict:
         "price_max_product": _product_ref(priciest),
         "price_mean": _f(df["price"].mean(), 2),
         "price_median": _f(df["price"].median(), 2),
+        "price_q1": _f(df["price"].quantile(0.25), 2),
+        "price_q3": _f(df["price"].quantile(0.75), 2),
         # Moyenne de data calculée sur les forfaits chiffrés : un forfait illimité n'a pas de volume.
         "data_mean_gb": _f(limited.mean(), 2),
         "data_median_gb": _f(limited.median(), 2),
@@ -74,7 +78,7 @@ def profile(df: pd.DataFrame, tiers: list[str], edges: list[float]) -> dict:
     price_per_gb = (limited["price"] / limited["data_gb"]).groupby(limited["tier"]).median()
     validities = sorted(df["validity_days"].unique())
     matrix = df.pivot_table(index="tier", columns="validity_days", values="price", aggfunc="median")
-    return {
+    result = {
         "kpis": kpis(df),
         "over_threshold_text": over_threshold_text(df),
         "data_mix": _counts(df["tier"], tiers),
@@ -96,6 +100,8 @@ def profile(df: pd.DataFrame, tiers: list[str], edges: list[float]) -> dict:
             ],
         },
     }
+    result["headlines"] = profile_headlines(result)
+    return result
 
 
 def provider_table(df: pd.DataFrame) -> list[dict]:
@@ -382,6 +388,130 @@ def insights(stats: dict) -> list[dict]:
                 "text": (
                     f"En illimité, la journée revient à {fmt_eur(short['price_per_day'])} sur {short['days']} jours "
                     f"contre {fmt_eur(long['price_per_day'])} sur {long['days']} jours (médianes)."
+                ),
+            }
+        )
+    return out
+
+
+# --- Titres des graphiques ------------------------------------------------------------------
+# Chaque graphique porte un titre qui énonce ce qu'il montre (« La moitié des cartes coûte moins
+# de 21 € ») plutôt qu'un intitulé neutre. Ils sont calculés ici pour suivre les données.
+
+
+def profile_headlines(profile_stats: dict) -> dict:
+    """Titres des graphiques qui dépendent du filtre fournisseur."""
+    k = profile_stats["kpis"]
+    out = {"prices": f"La moitié des cartes coûte moins de {fmt_eur(k['price_median'])}"}
+
+    mix = [m for m in profile_stats["data_mix"] if m["count"]]
+    total = sum(m["count"] for m in mix) or 1
+    shares = [m["count"] / total for m in mix]
+    if shares and max(shares) - min(shares) < 0.05:
+        out["data_mix"] = "Les volumes de data sont répartis presque à parts égales"
+    elif mix:
+        top = max(mix, key=lambda m: m["count"])
+        out["data_mix"] = f"Le volume le plus fréquent est {top['label']} ({fmt_pct(top['count'] / total, 0)} des cartes)"
+
+    networks = {m["label"]: m["count"] for m in profile_stats["network_mix"]}
+    top_up = {m["label"]: m["count"] for m in profile_stats["top_up_mix"]}
+    if networks and sum(top_up.values()):
+        share_5g = networks.get("5G", 0) / sum(networks.values())
+        share_top_up = top_up.get("Rechargeable", 0) / sum(top_up.values())
+        out["composition"] = f"{fmt_pct(share_5g, 0)} des cartes en 5G, {fmt_pct(share_top_up, 0)} rechargeables"
+
+    ppg = [p for p in profile_stats["price_per_gb"] if p["value"]]
+    if len(ppg) >= 2:
+        ratio = ppg[0]["value"] / ppg[-1]["value"]
+        out["price_per_gb"] = f"Le Go coûte {fmt_num(ratio)} fois moins cher en {ppg[-1]['label']} qu'en {ppg[0]['label']}"
+
+    matrix = profile_stats["price_matrix"]
+    rows = [
+        (label, values)
+        for label, values in zip(matrix["rows"], matrix["values"])
+        if label != UNLIMITED_LABEL and values and values[0] and values[-1]
+    ]
+    if len(rows) >= 2 and len(matrix["columns"]) >= 2:
+        duration = sorted(values[-1] / values[0] - 1 for _, values in rows)[len(rows) // 2]
+        volume = rows[-1][1][-1] / rows[0][1][-1]
+        out["price_matrix"] = (
+            f"De {matrix['columns'][0]} à {matrix['columns'][-1]}, le prix augmente de {fmt_pct(duration, 0)} ; "
+            f"de {rows[0][0]} à {rows[-1][0]}, il est multiplié par {fmt_num(volume)}"
+        )
+    return out
+
+
+def headlines(stats: dict) -> dict:
+    """Titres des graphiques calculés sur tout le catalogue."""
+    out: dict[str, str] = {}
+    providers = stats["providers"]
+    if len(providers) >= 4:
+        out["providers"] = f"Les 3 premiers fournisseurs pèsent {fmt_pct(sum(p['share'] for p in providers[:3]), 0)} du catalogue"
+
+    market = stats["market"]
+    if market["best_example"]:
+        out["savings"] = (
+            f"Comparer fait économiser {fmt_pct(market['saving_vs_mean'])} en moyenne sur un même forfait, "
+            f"et jusqu'à {fmt_pct(market['best_example']['saving'], 0)}"
+        )
+        leader = market["providers"][0]
+        out["win_rate"] = f"{leader['provider']}, le plus souvent en tête, n'est le moins cher que sur {fmt_pct(leader['win_rate'], 0)} des forfaits"
+        spread = max(abs(p["price_index"] or 0) for p in market["providers"])
+        out["price_index"] = f"À forfait identique, chaque fournisseur reste à ±{fmt_pct(spread)} du prix du marché"
+
+    network = stats["network"]
+    if network["available"]:
+        out["network"] = (
+            f"La 5G paraît {fmt_pct(network['raw_gap'], 0)} plus chère, mais l'écart tombe à "
+            f"{fmt_pct(network['same_offer_gap'])} à forfait identique"
+        )
+
+    unlimited = stats["unlimited"]["by_validity"]
+    if len(unlimited) >= 2:
+        short, long = unlimited[0], unlimited[-1]
+        out["unlimited"] = (
+            f"En illimité, la journée coûte {fmt_eur(short['price_per_day'])} sur {short['days']} jours, "
+            f"{fmt_eur(long['price_per_day'])} sur {long['days']} jours"
+        )
+
+    destinations = stats["destinations"]
+    if destinations["region_premium_per_gb"] is not None and destinations["regions"]:
+        out["destinations"] = f"Les forfaits multi-pays coûtent {fmt_pct(destinations['region_premium_per_gb'], 0)} de plus au Go que les forfaits pays"
+    return out
+
+
+def takeaways(stats: dict) -> list[dict]:
+    """Les trois enseignements mis en avant sur la vue d'ensemble : un chiffre, une phrase."""
+    out: list[dict] = []
+    market = stats["market"]
+    if market["best_example"]:
+        out.append(
+            {
+                "figure": fmt_pct(market["saving_vs_mean"], 0),
+                "text": (
+                    "d'économie moyenne en choisissant l'offre la moins chère d'un même forfait, "
+                    f"et jusqu'à {fmt_pct(market['best_example']['saving'], 0)} ({market['best_example']['label']})."
+                ),
+            }
+        )
+        leader = market["providers"][0]
+        out.append(
+            {
+                "figure": fmt_pct(leader["win_rate"], 0),
+                "text": (
+                    f"des forfaits seulement : c'est le score de {leader['provider']}, le fournisseur le plus souvent "
+                    "le moins cher. Aucun ne l'est partout, d'où l'intérêt de comparer offre par offre."
+                ),
+            }
+        )
+    ppg = [p for p in stats["overview"]["price_per_gb"] if p["value"]]
+    if len(ppg) >= 2:
+        out.append(
+            {
+                "figure": f"×{fmt_num(ppg[0]['value'] / ppg[-1]['value'])}",
+                "text": (
+                    f"C'est l'écart de prix au Go entre un forfait {ppg[0]['label']} ({fmt_eur(ppg[0]['value'])}) "
+                    f"et un forfait {ppg[-1]['label']} ({fmt_eur(ppg[-1]['value'])})."
                 ),
             }
         )

@@ -71,6 +71,8 @@ def write_site(
         meta=meta,
         summary=noscript_summary(stats["overview"]["kpis"]),
         rows_read=fmt_int(meta["rows_read"]),
+        products_label=fmt_int(meta["products"]),
+        providers_count=stats["overview"]["kpis"]["providers"],
         versions=versions,
         payload_json=script_json(payload),
     )
@@ -140,13 +142,15 @@ def sort_key(text: str) -> str:
 
 
 def copy_static(assets_dir: Path) -> dict[str, str]:
-    """Copie le CSS et le JS, et renvoie une empreinte courte de chacun (anti-cache navigateur)."""
+    """Copie le CSS, le JS et les polices, et renvoie une empreinte courte du CSS et du JS (anti-cache)."""
     assets_dir.mkdir(parents=True, exist_ok=True)
     versions = {}
     for name in STATIC_FILES:
         source = PACKAGE_DIR / "static" / name
         shutil.copyfile(source, assets_dir / name)
         versions[name] = hashlib.sha256(source.read_bytes()).hexdigest()[:10]
+    # Polices auto-hébergées (licence SIL OFL) : pas d'appel à un service tiers à l'ouverture de la page.
+    shutil.copytree(PACKAGE_DIR / "static" / "fonts", assets_dir / "fonts", dirs_exist_ok=True)
     return versions
 
 

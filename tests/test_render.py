@@ -8,7 +8,8 @@ def test_build_writes_the_site(small_catalog, tmp_path):
     out = tmp_path / "site"
     assert main(["--data", str(small_catalog), "--out", str(out)]) == 0
     html = (out / "index.html").read_text(encoding="utf-8")
-    assert "Vue d'ensemble du catalogue" in html
+    assert "Vue d'ensemble" in html and "Tableau de bord" in html
+    assert (out / "assets" / "fonts" / "newsreader.woff2").exists()
     assert (out / "assets" / "dashboard.js").exists()
     stats = json.loads((out / "stats.json").read_text(encoding="utf-8"))
     assert stats["stats"]["overview"]["kpis"]["products"] == 5

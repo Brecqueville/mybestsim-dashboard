@@ -19,7 +19,33 @@ Valeurs calculées sur les 18 fichiers fournis (5 056 lignes) :
 | 5 | Prix moyen | **29,30 €** (médiane 20,70 €) | Moyenne arithmétique de tous les prix |
 | 6 | Répartition par fournisseur | **18 fournisseurs**, d'Airalo (722 cartes) à 4S eSIM (92) | Graphique et tableau détaillé dans le dashboard |
 
-Le dashboard permet aussi de **filtrer ces indicateurs par fournisseur**, par exemple [Airalo](https://brecqueville.github.io/mybestsim-dashboard/?fournisseur=Airalo).
+Le dashboard permet aussi de **filtrer ces indicateurs par fournisseur**, par exemple [Airalo](https://brecqueville.github.io/mybestsim-dashboard/?fournisseur=Airalo). On peut aussi cliquer sur un fournisseur dans le graphique.
+
+## Structure du dashboard
+
+La structure suit trois références classiques de la conception de tableaux de bord :
+
+- **Stephen Few** (*Information Dashboard Design*) : un dashboard sert à suivre l'essentiel d'un coup d'œil, sur un seul écran. Il faut retirer tout ce qui n'est pas de la donnée, et mettre en avant ce qui compte.
+- **Ben Shneiderman** (*The Eyes Have It*, 1996) : d'abord la vue d'ensemble, puis le zoom et le filtre, puis le détail à la demande.
+- **La hiérarchie de lecture** : les indicateurs clés en haut à gauche, 5 à 7 au maximum, chacun avec un repère pour le situer.
+
+Concrètement, la page a six onglets, du général au détail :
+
+| Onglet | Rôle | Contenu |
+|---|---|---|
+| **Vue d'ensemble** | L'essentiel en un écran | Les 5 indicateurs demandés, la répartition par fournisseur, la distribution des prix et 3 enseignements |
+| **Prix** | Analyse | Prix au Go, effet volume et durée, ce que rapporte la comparaison, qui est le moins cher, 4G ou 5G, illimités |
+| **Fournisseurs** | Détail | Tableau triable des 18 fournisseurs sur 11 indicateurs ; un clic sur un nom filtre la vue d'ensemble |
+| **Destinations** | Détail | Tableau triable des 54 destinations, prix au Go |
+| **Comparateur** | Détail à la demande | Toutes les offres pour une destination, un volume et une durée |
+| **Qualité des données** | Confiance | Contrôles passés à chaque import, fichiers lus, définitions |
+
+Chaque graphique porte un **titre qui énonce ce qu'il montre** (« La moitié des cartes coûte moins de 20,70 € ») plutôt qu'un simple intitulé. Ces titres sont calculés par le programme : ils suivent les données et le filtre fournisseur.
+
+**Le design** se veut sobre et lisible :
+- **Fond et séparations** : un fond papier et des filets fins plutôt que des cartes et des ombres.
+- **Typographie** : un serif (Newsreader) pour les titres et les grands chiffres, et IBM Plex pour l'interface. Les deux polices sont hébergées avec le site : la page ne fait appel à aucun service tiers.
+- **Couleurs** : un bleu encre pour les données et un vermillon réservé à ce qu'il faut regarder (seuil de 100 €, fournisseur sélectionné, meilleur prix). Ces couleurs ont été contrôlées pour les daltoniens et pour le contraste, en thème clair comme en thème sombre.
 
 ## Les statistiques en plus (bonus)
 
@@ -35,7 +61,7 @@ Je les ai choisies pour leur utilité pour un comparateur d'eSIM :
 - **Un comparateur d'offres** : toutes les offres pour une destination, un volume et une durée, de la moins chère à la plus chère.
 - **Qualité des données** : les contrôles passés à chaque import, et leurs résultats.
 
-Les textes de la section « Ce que disent les données » sont **rédigés par le programme à partir des chiffres** : ils se mettent à jour avec les données.
+Les titres des graphiques et les enseignements sont **rédigés par le programme à partir des chiffres** : ils se mettent à jour avec les données.
 
 ## Choix assumés
 
@@ -79,7 +105,7 @@ esim_dashboard/
 ├── render.py          génération du site (HTML, stats.json, CSV consolidé)
 ├── formatting.py      nombres à la française (5 056 ; 29,30 € ; 1,1 %)
 ├── templates/         page HTML (Jinja2)
-└── static/            CSS et JavaScript d'affichage (sans dépendance externe)
+└── static/            CSS, JavaScript d'affichage et polices auto-hébergées (licence OFL)
 tests/                 tests unitaires (pytest)
 ```
 

@@ -58,5 +58,14 @@ def test_real_data_is_consistent():
     assert k["price_min"] <= k["price_mean"] <= k["price_max"]
     assert sum(b["count"] for b in result["overview"]["price_histogram"]) == k["products"]
     assert result["insights"]
+    assert len(result["takeaways"]) == 3
+    assert result["headlines"]["providers"].startswith("Les 3 premiers fournisseurs")
+    assert result["overview"]["headlines"]["prices"].startswith("La moitié des cartes")
+    assert k["price_q1"] <= k["price_median"] <= k["price_q3"]
     assert run_checks(catalog)
     json.dumps(result)  # tout doit être sérialisable pour le dashboard
+
+
+def test_headlines_follow_the_provider_filter(stats):
+    alpha, beta = stats["by_provider"]["Alpha"]["headlines"], stats["by_provider"]["Beta"]["headlines"]
+    assert alpha["prices"] != beta["prices"]  # chaque fournisseur a son propre prix médian

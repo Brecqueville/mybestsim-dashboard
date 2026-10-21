@@ -1,0 +1,56 @@
+# Automatisation : à chaque nouvel import de CSV (push), chaque jour à 7 h (heure de Paris)
+# ou à la demande, on teste le code, on recalcule les statistiques et on republie le dashboard.
+name: Dashboard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 5 * * *" # 05:00 UTC = 7 h à Paris en été, 6 h en hiver
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Installer les dépendances
+        run: pip install -r requirements-dev.txt
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Générer le dashboard
+        run: python -m esim_dashboard --data data --out site
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

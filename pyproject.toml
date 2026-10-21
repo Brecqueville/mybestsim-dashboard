@@ -1,0 +1,10 @@
+[project]
+name = "esim-dashboard"
+version = "1.0.0"
+description = "Statistiques clés du catalogue eSIM à partir des CSV fournisseurs (test technique MyBestSim)"
+requires-python = ">=3.11"
+dependencies = ["pandas>=2.2", "jinja2>=3.1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

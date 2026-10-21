@@ -8,9 +8,7 @@
   <meta name="robots" content="noindex">
   <meta property="og:title" content="Catalogue eSIM · Tableau de bord">
   <meta property="og:description" content="{{ meta.products }} cartes eSIM, {{ meta.files }} fournisseurs : prix, volumes, comparaison et qualité des données.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b1a17'/%3E%3Crect x='8' y='17' width='4' height='8' fill='%23f4f0e8'/%3E%3Crect x='14' y='11' width='4' height='14' fill='%23f4f0e8'/%3E%3Crect x='20' y='7' width='4' height='18' fill='%23d2492a'/%3E%3C/svg%3E">
-  <link rel="preload" href="assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="assets/fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 3h11l7 7v17a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z' fill='%232a78d6'/%3E%3Crect x='11' y='14' width='10' height='9' rx='1.5' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/dashboard.css?v={{ versions['dashboard.css'] }}">
   <script>
     try { var theme = localStorage.getItem("theme"); if (theme) document.documentElement.dataset.theme = theme; } catch (e) {}
@@ -19,300 +17,332 @@
 <body data-page="vue-ensemble">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
 
-  <header class="masthead">
-    <div class="wrap">
-      <div class="masthead__top">
-        <div class="masthead__title">
-          <p class="eyebrow">Catalogue eSIM · imports fournisseurs</p>
-          <h1>Tableau de bord</h1>
+  <div class="layout">
+    <!-- Panneau latéral : toujours visible, même en faisant défiler la page -->
+    <aside class="sidebar" aria-label="Navigation du tableau de bord">
+      <div class="brand">
+        <svg class="brand__icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 3h11l7 7v17a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><rect x="11" y="14" width="10" height="9" rx="1.5"/></svg>
+        <div>
+          <p class="brand__title">Catalogue eSIM</p>
+          <p class="brand__subtitle">Tableau de bord</p>
         </div>
-        <dl class="masthead__meta">
-          <div>
-            <dt>Données</dt>
-            <dd>{{ meta.files }} fichiers · {{ products_label }} produits</dd>
-          </div>
-          <div>
-            <dt>Mise à jour</dt>
-            <dd><span class="live" aria-hidden="true"></span><time datetime="{{ meta.generated_iso }}">{{ meta.generated_label }}</time></dd>
-          </div>
-        </dl>
-        <div class="masthead__actions">
-          {% if meta.repo_url %}<a class="link-action" href="{{ meta.repo_url }}">Code source <span aria-hidden="true">↗</span></a>{% endif %}
-          <button class="icon-button" id="theme-toggle" type="button" aria-label="Basculer entre thème clair et sombre">
+      </div>
+
+      <nav class="sidenav" aria-label="Pages du tableau de bord">
+        <p class="sidebar__label">Navigation</p>
+        <ul class="sidenav__list">
+          <li>
+            <a href="#vue-ensemble" data-tab="vue-ensemble">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+              Vue d'ensemble
+            </a>
+            <ul class="subnav" data-subnav="vue-ensemble"></ul>
+          </li>
+          <li>
+            <a href="#prix" data-tab="prix">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+              Prix
+            </a>
+            <ul class="subnav" data-subnav="prix"></ul>
+          </li>
+          <li>
+            <a href="#fournisseurs" data-tab="fournisseurs">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3L2.5 8 12 13l9.5-5L12 3z"/><path d="M2.5 13L12 18l9.5-5"/></svg>
+              Fournisseurs
+            </a>
+          </li>
+          <li>
+            <a href="#destinations" data-tab="destinations">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+              Destinations
+            </a>
+          </li>
+          <li>
+            <a href="#comparateur" data-tab="comparateur">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4"/></svg>
+              Comparateur
+            </a>
+          </li>
+          <li>
+            <a href="#qualite" data-tab="qualite">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3L4.5 6v6c0 4.6 3.2 7.7 7.5 9 4.3-1.3 7.5-4.4 7.5-9V6L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+              Qualité des données
+            </a>
+            <ul class="subnav" data-subnav="qualite"></ul>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__filter">
+        <label class="sidebar__label" for="provider-filter">Fournisseur</label>
+        <select id="provider-filter">
+          <option value="">Tous les fournisseurs ({{ providers_count }})</option>
+        </select>
+        <p class="sidebar__hint" id="filter-hint">Filtre la vue d'ensemble et les prix.</p>
+      </div>
+
+      <div class="sidebar__footer">
+        <p class="status"><span class="status__dot" aria-hidden="true"></span>Mis à jour le <time datetime="{{ meta.generated_iso }}">{{ meta.generated_label }}</time></p>
+        <p class="sidebar__meta">{{ meta.files }} fichiers · {{ products_label }} produits · recalcul chaque jour à 7&nbsp;h</p>
+        <div class="sidebar__actions">
+          {% if meta.repo_url %}<a class="btn" href="{{ meta.repo_url }}">Code source <span aria-hidden="true">↗</span></a>{% endif %}
+          <button class="btn btn--icon" id="theme-toggle" type="button" aria-label="Basculer entre thème clair et sombre">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
           </button>
         </div>
       </div>
-      <div class="masthead__bar">
-        <nav class="tabs" aria-label="Pages du tableau de bord">
-          <a href="#vue-ensemble" data-tab="vue-ensemble">Vue d'ensemble</a>
-          <a href="#prix" data-tab="prix">Prix</a>
-          <a href="#fournisseurs" data-tab="fournisseurs">Fournisseurs</a>
-          <a href="#destinations" data-tab="destinations">Destinations</a>
-          <a href="#comparateur" data-tab="comparateur">Comparateur</a>
-          <a href="#qualite" data-tab="qualite">Qualité des données</a>
-        </nav>
-        <div class="scope-filter" id="scope-filter">
-          <label for="provider-filter">Fournisseur</label>
-          <select id="provider-filter">
-            <option value="">Tous ({{ providers_count }})</option>
-          </select>
-        </div>
-      </div>
+    </aside>
+
+    <div class="main-col">
+      <main id="contenu">
+        <noscript>
+          <div class="card noscript">
+            <p><strong>JavaScript est désactivé :</strong> voici les indicateurs principaux. Activez-le pour les graphiques et les filtres.</p>
+            <dl>
+              {% for label, value in summary %}<div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+            </dl>
+          </div>
+        </noscript>
+
+        <!-- 1. Vue d'ensemble : les indicateurs demandés, lisibles en un coup d'œil -->
+        <section class="page" id="vue-ensemble" aria-labelledby="titre-vue">
+          <header class="page__head">
+            <h1 class="page__title" id="titre-vue">Vue d'ensemble</h1>
+            <p class="page__lead" id="scope-label"></p>
+          </header>
+
+          <div class="kpis" id="sec-kpis" data-section="Indicateurs clés">
+            <article class="tile tile--hero">
+              <p class="tile__label">Cartes eSIM (produits)</p>
+              <p class="tile__value" data-kpi="products"></p>
+              <p class="tile__note" data-kpi="products-note"></p>
+            </article>
+            <article class="tile">
+              <p class="tile__label">Produits à plus de 100&nbsp;€</p>
+              <p class="tile__value" data-kpi="over"></p>
+              <p class="tile__note" data-kpi="over-note"></p>
+            </article>
+            <article class="tile tile--wide">
+              <p class="tile__label">Fourchette de prix</p>
+              <p class="tile__value tile__value--range" data-kpi="range"></p>
+              <div class="range" id="price-range" aria-hidden="true"></div>
+              <p class="tile__note" data-kpi="range-note"></p>
+            </article>
+            <article class="tile">
+              <p class="tile__label">Data moyenne par carte</p>
+              <p class="tile__value" data-kpi="data"></p>
+              <p class="tile__note" data-kpi="data-note"></p>
+            </article>
+            <article class="tile">
+              <p class="tile__label">Prix moyen</p>
+              <p class="tile__value" data-kpi="price"></p>
+              <p class="tile__note" data-kpi="price-note"></p>
+            </article>
+            <article class="tile">
+              <p class="tile__label">Forfaits illimités</p>
+              <p class="tile__value" data-kpi="unlimited"></p>
+              <p class="tile__note" data-kpi="unlimited-note"></p>
+            </article>
+          </div>
+
+          <div class="grid">
+            <article class="card col-7" id="sec-repartition" data-section="Répartition par fournisseur">
+              <header class="card__head">
+                <h2 class="card__title">Répartition par fournisseur</h2>
+                <p class="card__insight" data-headline="providers"></p>
+                <p class="card__note">Nombre de cartes eSIM par fournisseur et part du catalogue. Cliquez sur un fournisseur pour filtrer la page.</p>
+              </header>
+              <div id="chart-providers"></div>
+            </article>
+
+            <div class="col-5 stack">
+              <article class="card" id="sec-prix" data-section="Distribution des prix">
+                <header class="card__head">
+                  <h2 class="card__title">Distribution des prix</h2>
+                  <p class="card__insight" data-headline-profile="prices"></p>
+                  <p class="card__note">Nombre de cartes par tranche de 10&nbsp;€</p>
+                </header>
+                <div id="chart-histogram"></div>
+              </article>
+
+              <article class="card card--accent" id="sec-retenir" data-section="À retenir">
+                <header class="card__head">
+                  <h2 class="card__title">À retenir</h2>
+                  <p class="card__note">Trois enseignements utiles pour un comparateur</p>
+                </header>
+                <ol class="takeaways" id="takeaways"></ol>
+                <footer class="card__foot"><a href="#prix">Voir l'analyse des prix →</a></footer>
+              </article>
+            </div>
+
+            <article class="card col-6" id="sec-volume" data-section="Volume de data">
+              <header class="card__head">
+                <h2 class="card__title">Volume de data</h2>
+                <p class="card__insight" data-headline-profile="data_mix"></p>
+                <p class="card__note">Nombre de cartes par volume de data inclus</p>
+              </header>
+              <div id="chart-data-mix"></div>
+            </article>
+
+            <article class="card col-6" id="sec-composition" data-section="Composition">
+              <header class="card__head">
+                <h2 class="card__title">Composition du catalogue</h2>
+                <p class="card__insight" data-headline-profile="composition"></p>
+                <p class="card__note">Durée de validité, réseau et recharge</p>
+              </header>
+              <div id="chart-composition"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 2. Prix : ce qui fait varier les prix, et ce que rapporte la comparaison -->
+        <section class="page" id="prix" aria-labelledby="titre-prix" hidden>
+          <header class="page__head">
+            <h1 class="page__title" id="titre-prix">Prix</h1>
+            <p class="page__lead" id="scope-prix"></p>
+          </header>
+
+          <div class="kpis kpis--4" id="market-kpis" data-section="Ce que rapporte la comparaison"></div>
+
+          <div class="grid">
+            <article class="card col-6" id="sec-ppg" data-section="Prix au Go">
+              <header class="card__head">
+                <h2 class="card__title">Prix au Go selon le volume</h2>
+                <p class="card__insight" data-headline-profile="price_per_gb"></p>
+                <p class="card__note">Prix médian au Go, hors forfaits illimités</p>
+              </header>
+              <div id="chart-price-per-gb"></div>
+            </article>
+
+            <article class="card col-6" id="sec-matrix" data-section="Volume et durée">
+              <header class="card__head">
+                <h2 class="card__title">Prix médian par volume et durée</h2>
+                <p class="card__insight" data-headline-profile="price_matrix"></p>
+              </header>
+              <div id="chart-price-matrix"></div>
+            </article>
+
+            <article class="card col-6" id="sec-win" data-section="Qui est le moins cher ?">
+              <header class="card__head">
+                <h2 class="card__title">Qui est le moins cher ?</h2>
+                <p class="card__insight" data-headline="win_rate"></p>
+                <p class="card__note">Part des forfaits où le fournisseur propose l'offre la moins chère, parmi ceux où il a au moins un concurrent</p>
+              </header>
+              <div id="chart-win-rate"></div>
+            </article>
+
+            <article class="card col-6" id="sec-index" data-section="Écart au marché">
+              <header class="card__head">
+                <h2 class="card__title">Écart au prix du marché</h2>
+                <p class="card__insight" data-headline="price_index"></p>
+                <p class="card__note">Écart moyen au prix médian du même forfait (même destination, volume et durée)</p>
+              </header>
+              <div id="chart-price-index"></div>
+            </article>
+
+            <article class="card col-6" id="sec-network" data-section="4G ou 5G">
+              <header class="card__head">
+                <h2 class="card__title">4G ou 5G</h2>
+                <p class="card__insight" data-headline="network"></p>
+              </header>
+              <div id="chart-network"></div>
+            </article>
+
+            <article class="card col-6" id="sec-unlimited" data-section="Forfaits illimités">
+              <header class="card__head">
+                <h2 class="card__title">Forfaits illimités : le prix d'une journée</h2>
+                <p class="card__insight" data-headline="unlimited"></p>
+              </header>
+              <div id="chart-unlimited"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 3. Fournisseurs : le détail, fournisseur par fournisseur -->
+        <section class="page" id="fournisseurs" aria-labelledby="titre-fournisseurs" hidden>
+          <header class="page__head">
+            <h1 class="page__title" id="titre-fournisseurs">Fournisseurs</h1>
+            <p class="page__lead">Les {{ providers_count }} fournisseurs sur 11 indicateurs. Cliquez sur un en-tête pour trier, sur un nom pour voir la vue d'ensemble du fournisseur.</p>
+          </header>
+          <div class="card" id="table-providers"></div>
+        </section>
+
+        <!-- 4. Destinations -->
+        <section class="page" id="destinations" aria-labelledby="titre-destinations" hidden>
+          <header class="page__head">
+            <h1 class="page__title" id="titre-destinations">Destinations</h1>
+            <p class="page__lead" data-headline="destinations"></p>
+          </header>
+          <div class="kpis kpis--4" id="destination-kpis"></div>
+          <div class="card" id="table-destinations"></div>
+        </section>
+
+        <!-- 5. Comparateur : le détail à la demande, offre par offre -->
+        <section class="page" id="comparateur" aria-labelledby="titre-comparateur" hidden>
+          <header class="page__head">
+            <h1 class="page__title" id="titre-comparateur">Comparateur</h1>
+            <p class="page__lead">Toutes les offres du catalogue pour un même besoin, de la moins chère à la plus chère.</p>
+          </header>
+          <div class="card">
+            <form class="query" id="explorer-form">
+              <div class="field"><label for="ex-destination">Destination</label><select id="ex-destination"></select></div>
+              <div class="field"><label for="ex-tier">Volume</label><select id="ex-tier"></select></div>
+              <div class="field"><label for="ex-validity">Durée</label><select id="ex-validity"></select></div>
+              <div class="field"><label for="ex-network">Réseau</label><select id="ex-network"></select></div>
+            </form>
+            <p class="query__summary" id="explorer-summary" aria-live="polite"></p>
+            <div id="explorer-results"></div>
+          </div>
+        </section>
+
+        <!-- 6. Qualité des données et méthode -->
+        <section class="page" id="qualite" aria-labelledby="titre-qualite" hidden>
+          <header class="page__head">
+            <h1 class="page__title" id="titre-qualite">Qualité des données</h1>
+            <p class="page__lead">Contrôles passés à chaque import. Aucune ligne n'est corrigée en silence : tout écart est signalé ici.</p>
+          </header>
+          <div class="grid">
+            <article class="card col-7" id="sec-checks" data-section="Contrôles">
+              <header class="card__head">
+                <h2 class="card__title">Contrôles</h2>
+                <p class="card__note">Ce qui a été vérifié sur ce lot de fichiers</p>
+              </header>
+              <ul class="checks" id="checks"></ul>
+            </article>
+            <article class="card col-5" id="sec-files" data-section="Fichiers importés">
+              <header class="card__head">
+                <h2 class="card__title">Fichiers importés</h2>
+                <p class="card__note">{{ meta.files }} fichiers lus, {{ rows_read }} lignes</p>
+              </header>
+              <div id="table-files"></div>
+              <footer class="card__foot">
+                Exports : <a href="catalogue-consolide.csv" download>catalogue consolidé (CSV)</a> · <a href="stats.json">statistiques (JSON)</a>
+              </footer>
+            </article>
+            <article class="card col-12" id="sec-method" data-section="Méthode">
+              <header class="card__head">
+                <h2 class="card__title">Méthode et définitions</h2>
+              </header>
+              <dl class="definitions">
+                <div><dt>Carte eSIM (produit)</dt><dd>Une ligne valide d'un fichier fournisseur, identifiée par son SKU.</dd></div>
+                <div><dt>Produits à plus de 100&nbsp;€</dt><dd>Prix strictement supérieur à 100&nbsp;€. Tous les prix sont en euros, tels que fournis.</dd></div>
+                <div><dt>Data moyenne par carte</dt><dd>Moyenne des volumes en Go des forfaits chiffrés. Un forfait illimité n'a pas de volume : il est exclu de ce seul calcul, et sa part est affichée à côté.</dd></div>
+                <div><dt>Prix moyen</dt><dd>Moyenne arithmétique de tous les prix. La médiane est donnée en complément, car quelques forfaits illimités chers tirent la moyenne vers le haut.</dd></div>
+                <div><dt>Même forfait</dt><dd>Même destination, même volume, même durée. Sert à comparer les fournisseurs à offre égale.</dd></div>
+                <div><dt>Zones multi-pays</dt><dd>Europe (EU), Asie (AS), Amérique du Nord (NA) et Monde (WW). Ces codes ne sont pas des codes ISO : en ISO, AS désigne les Samoa américaines et NA la Namibie.</dd></div>
+                <div><dt>Automatisation</dt><dd>Un workflow GitHub Actions relance les tests, recalcule les statistiques et republie cette page à chaque nouvel import, et chaque jour à 7&nbsp;h.</dd></div>
+              </dl>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="colophon">
+        <p>Réalisé par Nicolas Brecqueville · test technique MyBestSim</p>
+        <p>Python (pandas) calcule, cette page affiche. Généré le {{ meta.generated_label }}.{% if meta.repo_url %} <a href="{{ meta.repo_url }}">Voir le code</a>{% endif %}</p>
+      </footer>
     </div>
-  </header>
-
-  <main id="contenu" class="wrap">
-    <noscript>
-      <div class="noscript">
-        <p><strong>JavaScript est désactivé :</strong> voici les indicateurs principaux. Activez-le pour les graphiques et les filtres.</p>
-        <dl>
-          {% for label, value in summary %}<div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>{% endfor %}
-        </dl>
-      </div>
-    </noscript>
-
-    <!-- 1. Vue d'ensemble : les indicateurs demandés, lisibles en un coup d'œil -->
-    <section class="page" id="vue-ensemble" aria-labelledby="titre-vue">
-      <header class="page__head">
-        <h2 class="page__title" id="titre-vue">Vue d'ensemble</h2>
-        <p class="page__lead" id="scope-label"></p>
-      </header>
-
-      <div class="kpis" role="list">
-        <div class="kpi" role="listitem">
-          <p class="kpi__label">Cartes eSIM</p>
-          <p class="kpi__value" data-kpi="products"></p>
-          <p class="kpi__note" data-kpi="products-note"></p>
-        </div>
-        <div class="kpi" role="listitem">
-          <p class="kpi__label">Produits à plus de 100&nbsp;€</p>
-          <p class="kpi__value" data-kpi="over"></p>
-          <p class="kpi__note" data-kpi="over-note"></p>
-        </div>
-        <div class="kpi kpi--wide" role="listitem">
-          <p class="kpi__label">Fourchette de prix</p>
-          <p class="kpi__value" data-kpi="range"></p>
-          <div class="range" id="price-range" aria-hidden="true"></div>
-          <p class="kpi__note" data-kpi="range-note"></p>
-        </div>
-        <div class="kpi" role="listitem">
-          <p class="kpi__label">Data moyenne par carte</p>
-          <p class="kpi__value" data-kpi="data"></p>
-          <p class="kpi__note" data-kpi="data-note"></p>
-        </div>
-        <div class="kpi" role="listitem">
-          <p class="kpi__label">Prix moyen</p>
-          <p class="kpi__value" data-kpi="price"></p>
-          <p class="kpi__note" data-kpi="price-note"></p>
-        </div>
-      </div>
-
-      <div class="grid">
-        <article class="panel col-7" aria-labelledby="h-providers">
-          <header class="panel__head">
-            <p class="panel__kicker">Répartition par fournisseur</p>
-            <h3 class="panel__title" id="h-providers" data-headline="providers"></h3>
-            <p class="panel__sub">Nombre de cartes eSIM proposées par chacun des {{ providers_count }} fournisseurs, et part du catalogue</p>
-          </header>
-          <div id="chart-providers"></div>
-          <footer class="panel__foot">
-            <span>Cliquez sur un fournisseur pour filtrer la page.</span>
-            <a href="#fournisseurs">Comparer les fournisseurs →</a>
-          </footer>
-        </article>
-
-        <div class="col-5 stack">
-          <article class="panel" aria-labelledby="h-prices">
-            <header class="panel__head">
-              <p class="panel__kicker">Distribution des prix</p>
-              <h3 class="panel__title" id="h-prices" data-headline-profile="prices"></h3>
-              <p class="panel__sub">Nombre de cartes par tranche de 10&nbsp;€</p>
-            </header>
-            <div id="chart-histogram"></div>
-          </article>
-
-          <article class="panel panel--takeaways" aria-labelledby="h-takeaways">
-            <header class="panel__head">
-              <p class="panel__kicker">À retenir</p>
-              <h3 class="panel__title" id="h-takeaways">Trois enseignements pour un comparateur</h3>
-            </header>
-            <ol class="takeaways" id="takeaways"></ol>
-            <footer class="panel__foot"><a href="#prix">Voir l'analyse des prix →</a></footer>
-          </article>
-        </div>
-
-        <article class="panel col-6" aria-labelledby="h-data-mix">
-          <header class="panel__head">
-            <p class="panel__kicker">Volume de data</p>
-            <h3 class="panel__title" id="h-data-mix" data-headline-profile="data_mix"></h3>
-            <p class="panel__sub">Nombre de cartes par volume de data inclus</p>
-          </header>
-          <div id="chart-data-mix"></div>
-        </article>
-
-        <article class="panel col-6" aria-labelledby="h-composition">
-          <header class="panel__head">
-            <p class="panel__kicker">Composition du catalogue</p>
-            <h3 class="panel__title" id="h-composition" data-headline-profile="composition"></h3>
-            <p class="panel__sub">Part des cartes selon la durée de validité, le réseau et la recharge</p>
-          </header>
-          <div id="chart-composition"></div>
-        </article>
-      </div>
-    </section>
-
-    <!-- 2. Prix : ce qui fait varier les prix, et ce que rapporte la comparaison -->
-    <section class="page" id="prix" aria-labelledby="titre-prix" hidden>
-      <header class="page__head">
-        <h2 class="page__title" id="titre-prix">Prix</h2>
-        <p class="page__lead" id="scope-prix">Ce qui fait varier les prix, et ce que rapporte la comparaison des offres.</p>
-      </header>
-
-      <div class="kpis kpis--4" id="market-kpis" role="list"></div>
-
-      <div class="grid">
-        <article class="panel col-6" aria-labelledby="h-ppg">
-          <header class="panel__head">
-            <p class="panel__kicker">Prix au Go</p>
-            <h3 class="panel__title" id="h-ppg" data-headline-profile="price_per_gb"></h3>
-            <p class="panel__sub">Prix médian au Go selon le volume du forfait, hors forfaits illimités</p>
-          </header>
-          <div id="chart-price-per-gb"></div>
-        </article>
-
-        <article class="panel col-6" aria-labelledby="h-matrix">
-          <header class="panel__head">
-            <p class="panel__kicker">Volume et durée</p>
-            <h3 class="panel__title" id="h-matrix" data-headline-profile="price_matrix"></h3>
-            <p class="panel__sub">Prix médian par volume et par durée de validité</p>
-          </header>
-          <div id="chart-price-matrix"></div>
-        </article>
-
-        <article class="panel col-6" aria-labelledby="h-win">
-          <header class="panel__head">
-            <p class="panel__kicker">Qui est le moins cher ?</p>
-            <h3 class="panel__title" id="h-win" data-headline="win_rate"></h3>
-            <p class="panel__sub">Part des forfaits où le fournisseur propose l'offre la moins chère, parmi ceux où il a au moins un concurrent</p>
-          </header>
-          <div id="chart-win-rate"></div>
-        </article>
-
-        <article class="panel col-6" aria-labelledby="h-index">
-          <header class="panel__head">
-            <p class="panel__kicker">Écart au marché</p>
-            <h3 class="panel__title" id="h-index" data-headline="price_index"></h3>
-            <p class="panel__sub">Écart moyen entre le prix du fournisseur et le prix médian du même forfait (même destination, volume et durée)</p>
-          </header>
-          <div id="chart-price-index"></div>
-        </article>
-
-        <article class="panel col-6" aria-labelledby="h-network">
-          <header class="panel__head">
-            <p class="panel__kicker">4G ou 5G</p>
-            <h3 class="panel__title" id="h-network" data-headline="network"></h3>
-            <p class="panel__sub">Écart de prix entre 5G et 4G, brut puis à forfait identique</p>
-          </header>
-          <div id="chart-network"></div>
-        </article>
-
-        <article class="panel col-6" aria-labelledby="h-unlimited">
-          <header class="panel__head">
-            <p class="panel__kicker">Forfaits illimités</p>
-            <h3 class="panel__title" id="h-unlimited" data-headline="unlimited"></h3>
-            <p class="panel__sub">Prix médian d'une journée, selon la durée du forfait</p>
-          </header>
-          <div id="chart-unlimited"></div>
-        </article>
-      </div>
-    </section>
-
-    <!-- 3. Fournisseurs : le détail, fournisseur par fournisseur -->
-    <section class="page" id="fournisseurs" aria-labelledby="titre-fournisseurs" hidden>
-      <header class="page__head">
-        <h2 class="page__title" id="titre-fournisseurs">Fournisseurs</h2>
-        <p class="page__lead">Les {{ providers_count }} fournisseurs sur 11 indicateurs. Cliquez sur un en-tête pour trier, sur un nom pour filtrer la vue d'ensemble.</p>
-      </header>
-      <div id="table-providers"></div>
-    </section>
-
-    <!-- 4. Destinations -->
-    <section class="page" id="destinations" aria-labelledby="titre-destinations" hidden>
-      <header class="page__head">
-        <h2 class="page__title" id="titre-destinations">Destinations</h2>
-        <p class="page__lead" data-headline="destinations"></p>
-      </header>
-      <div class="kpis kpis--4" id="destination-kpis" role="list"></div>
-      <div id="table-destinations"></div>
-    </section>
-
-    <!-- 5. Comparateur : le détail à la demande, offre par offre -->
-    <section class="page" id="comparateur" aria-labelledby="titre-comparateur" hidden>
-      <header class="page__head">
-        <h2 class="page__title" id="titre-comparateur">Comparateur</h2>
-        <p class="page__lead">Toutes les offres du catalogue pour un même besoin, de la moins chère à la plus chère.</p>
-      </header>
-      <form class="query" id="explorer-form">
-        <div class="field"><label for="ex-destination">Destination</label><select id="ex-destination"></select></div>
-        <div class="field"><label for="ex-tier">Volume</label><select id="ex-tier"></select></div>
-        <div class="field"><label for="ex-validity">Durée</label><select id="ex-validity"></select></div>
-        <div class="field"><label for="ex-network">Réseau</label><select id="ex-network"></select></div>
-      </form>
-      <p class="query__summary" id="explorer-summary" aria-live="polite"></p>
-      <div id="explorer-results"></div>
-    </section>
-
-    <!-- 6. Qualité des données et méthode -->
-    <section class="page" id="qualite" aria-labelledby="titre-qualite" hidden>
-      <header class="page__head">
-        <h2 class="page__title" id="titre-qualite">Qualité des données</h2>
-        <p class="page__lead">Contrôles passés à chaque import. Aucune ligne n'est corrigée en silence : tout écart est signalé ici.</p>
-      </header>
-      <div class="grid">
-        <article class="panel col-7" aria-labelledby="h-checks">
-          <header class="panel__head">
-            <p class="panel__kicker">Contrôles</p>
-            <h3 class="panel__title" id="h-checks">Ce qui a été vérifié sur ce lot de fichiers</h3>
-          </header>
-          <ul class="checks" id="checks"></ul>
-        </article>
-        <article class="panel col-5" aria-labelledby="h-files">
-          <header class="panel__head">
-            <p class="panel__kicker">Fichiers</p>
-            <h3 class="panel__title" id="h-files">{{ meta.files }} fichiers lus, {{ rows_read }} lignes</h3>
-          </header>
-          <div id="table-files"></div>
-          <footer class="panel__foot">
-            <span>Exports</span>
-            <span><a href="catalogue-consolide.csv" download>catalogue consolidé (CSV)</a> · <a href="stats.json">statistiques (JSON)</a></span>
-          </footer>
-        </article>
-        <article class="panel col-12" aria-labelledby="h-method">
-          <header class="panel__head">
-            <p class="panel__kicker">Méthode</p>
-            <h3 class="panel__title" id="h-method">Définitions et choix de calcul</h3>
-          </header>
-          <dl class="definitions">
-            <div><dt>Carte eSIM (produit)</dt><dd>Une ligne valide d'un fichier fournisseur, identifiée par son SKU.</dd></div>
-            <div><dt>Produits à plus de 100&nbsp;€</dt><dd>Prix strictement supérieur à 100&nbsp;€. Tous les prix sont en euros, tels que fournis.</dd></div>
-            <div><dt>Data moyenne par carte</dt><dd>Moyenne des volumes en Go des forfaits chiffrés. Un forfait illimité n'a pas de volume : il est exclu de ce seul calcul, et sa part est affichée à côté.</dd></div>
-            <div><dt>Prix moyen</dt><dd>Moyenne arithmétique de tous les prix. La médiane est donnée en complément, car quelques forfaits illimités chers tirent la moyenne vers le haut.</dd></div>
-            <div><dt>Même forfait</dt><dd>Même destination, même volume, même durée. Sert à comparer les fournisseurs à offre égale.</dd></div>
-            <div><dt>Zones multi-pays</dt><dd>Europe (EU), Asie (AS), Amérique du Nord (NA) et Monde (WW). Ces codes ne sont pas des codes ISO : en ISO, AS désigne les Samoa américaines et NA la Namibie.</dd></div>
-            <div><dt>Automatisation</dt><dd>Un workflow GitHub Actions relance les tests, recalcule les statistiques et republie cette page à chaque nouvel import, et chaque jour à 7&nbsp;h.</dd></div>
-          </dl>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <footer class="colophon">
-    <div class="wrap colophon__inner">
-      <p>Réalisé par Nicolas Brecqueville · test technique MyBestSim</p>
-      <p>Python (pandas) calcule, cette page affiche. Généré le {{ meta.generated_label }}.{% if meta.repo_url %} <a href="{{ meta.repo_url }}">Voir le code</a>{% endif %}</p>
-    </div>
-  </footer>
+  </div>
 
   <script type="application/json" id="payload">{{ payload_json }}</script>
   <script src="assets/dashboard.js?v={{ versions['dashboard.js'] }}" defer></script>

@@ -29,9 +29,9 @@ La structure suit trois références classiques de la conception de tableaux de 
 - **Ben Shneiderman** (*The Eyes Have It*, 1996) : d'abord la vue d'ensemble, puis le zoom et le filtre, puis le détail à la demande.
 - **La hiérarchie de lecture** : les indicateurs clés en haut à gauche, 5 à 7 au maximum, chacun avec un repère pour le situer.
 
-Concrètement, la page a six onglets, du général au détail :
+Concrètement, un **panneau latéral fixe** donne accès à six pages, du général au détail. Il reste visible pendant le défilement : il liste aussi les sections de la page ouverte et met en évidence celle que l'on est en train de lire.
 
-| Onglet | Rôle | Contenu |
+| Page | Rôle | Contenu |
 |---|---|---|
 | **Vue d'ensemble** | L'essentiel en un écran | Les 5 indicateurs demandés, la répartition par fournisseur, la distribution des prix et 3 enseignements |
 | **Prix** | Analyse | Prix au Go, effet volume et durée, ce que rapporte la comparaison, qui est le moins cher, 4G ou 5G, illimités |
@@ -40,12 +40,13 @@ Concrètement, la page a six onglets, du général au détail :
 | **Comparateur** | Détail à la demande | Toutes les offres pour une destination, un volume et une durée |
 | **Qualité des données** | Confiance | Contrôles passés à chaque import, fichiers lus, définitions |
 
-Chaque graphique porte un **titre qui énonce ce qu'il montre** (« La moitié des cartes coûte moins de 20,70 € ») plutôt qu'un simple intitulé. Ces titres sont calculés par le programme : ils suivent les données et le filtre fournisseur.
+Sous le titre de chaque graphique, une **phrase énonce ce qu'il montre** (« La moitié des cartes coûte moins de 20,70 € »). Ces phrases sont calculées par le programme : elles suivent les données et le filtre fournisseur.
 
 **Le design** se veut sobre et lisible :
-- **Fond et séparations** : un fond papier et des filets fins plutôt que des cartes et des ombres.
-- **Typographie** : un serif (Newsreader) pour les titres et les grands chiffres, et IBM Plex pour l'interface. Les deux polices sont hébergées avec le site : la page ne fait appel à aucun service tiers.
-- **Couleurs** : un bleu encre pour les données et un vermillon réservé à ce qu'il faut regarder (seuil de 100 €, fournisseur sélectionné, meilleur prix). Ces couleurs ont été contrôlées pour les daltoniens et pour le contraste, en thème clair comme en thème sombre.
+- **Des cartes** : chaque indicateur et chaque graphique a sa carte, avec un titre, une phrase qui énonce le constat et une note de méthode.
+- **La police système** de l'appareil : rapide, nette, rien à charger.
+- **Couleurs** : un bleu pour les données, et un orange réservé à ce qu'il faut regarder (seuil de 100 €, fournisseur sélectionné). Ces couleurs ont été contrôlées pour les daltoniens et pour le contraste, en thème clair comme en thème sombre.
+- **Sur mobile**, le panneau latéral devient une barre fixée en haut de l'écran.
 
 ## Les statistiques en plus (bonus)
 
@@ -105,7 +106,7 @@ esim_dashboard/
 ├── render.py          génération du site (HTML, stats.json, CSV consolidé)
 ├── formatting.py      nombres à la française (5 056 ; 29,30 € ; 1,1 %)
 ├── templates/         page HTML (Jinja2)
-└── static/            CSS, JavaScript d'affichage et polices auto-hébergées (licence OFL)
+└── static/            CSS et JavaScript d'affichage (sans dépendance externe)
 tests/                 tests unitaires (pytest)
 ```
 

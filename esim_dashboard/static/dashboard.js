@@ -269,7 +269,7 @@
   }
 
   // Tableau triable : la version détaillée et accessible des graphiques.
-  function dataTable(columns, rows, { caption, sortable = false, initialSort = null } = {}) {
+  function dataTable(columns, rows, { caption, sortable = false, initialSort = null, rowClass = null } = {}) {
     let sortState = initialSort;
     const tbody = h("tbody");
     const headCells = columns.map((col, i) => {
@@ -296,7 +296,7 @@
         ...sorted.map((r) =>
           h(
             "tr",
-            {},
+            { class: rowClass ? rowClass(r) : null },
             columns.map((col, i) => {
               const content = col.render ? col.render(r) : col.format ? col.format(r[i]) : r[i];
               return h(i === 0 ? "th" : "td", { scope: i === 0 ? "row" : null, class: col.num ? "is-num" : null }, content ?? "–");
@@ -325,7 +325,7 @@
     );
 
   const kpi = (label, value, ...notes) =>
-    h("div", { class: "kpi", role: "listitem" }, h("p", { class: "kpi__label", text: label }), h("p", { class: "kpi__value", text: value }), notes.filter(Boolean).map((n) => h("p", { class: "kpi__note", text: n })));
+    h("article", { class: "tile" }, h("p", { class: "tile__label", text: label }), h("p", { class: "tile__value", text: value }), notes.filter(Boolean).map((n) => h("p", { class: "tile__note", text: n })));
 
   /* ---------- État : page affichée et filtre fournisseur ---------- */
 
@@ -352,22 +352,81 @@
     else url.searchParams.delete("fournisseur");
     history.replaceState(null, "", url);
     FILTERED_PAGES.forEach((page) => rendered.delete(page));
+    rendered.delete("fournisseurs");
     renderPage(state.page);
   }
 
   const toggleProvider = (name) => setProvider(state.provider === name ? "" : name);
 
+  const FILTER_HINTS = {
+    "vue-ensemble": "Filtre la vue d'ensemble et les prix.",
+    prix: "Filtre le prix au Go et la matrice ; met en évidence le fournisseur dans les comparaisons.",
+    fournisseurs: "Met en évidence le fournisseur dans le tableau.",
+  };
+
   function showPage(id) {
     state.page = PAGES.includes(id) ? id : "vue-ensemble";
     for (const page of PAGES) byId(page).hidden = page !== state.page;
-    document.querySelectorAll(".tabs a").forEach((a) => {
+    document.querySelectorAll("[data-tab]").forEach((a) => {
       if (a.dataset.tab === state.page) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
     });
     document.body.dataset.page = state.page;
-    const tab = document.querySelector(`.tabs a[data-tab="${state.page}"]`);
-    document.title = `${tab ? tab.textContent : "Tableau de bord"} · Catalogue eSIM`;
+    byId("filter-hint").textContent = FILTER_HINTS[state.page] ?? "Sans effet sur cette page.";
+    const tab = document.querySelector(`[data-tab="${state.page}"]`);
+    document.title = `${tab ? tab.textContent.trim() : "Tableau de bord"} · Catalogue eSIM`;
     renderPage(state.page);
+    pinned = null;
+    markSection(document.querySelector(`#${state.page} [data-section]`));
+  }
+
+  /* ---------- Panneau latéral : sections de la page ouverte et repère de lecture ---------- */
+
+  const sectionButtons = new Map();
+  // Section choisie dans le menu : elle reste active (même à côté d'une autre carte) jusqu'au prochain défilement manuel.
+  let pinned = null;
+  for (const event of ["wheel", "touchmove", "keydown"]) window.addEventListener(event, () => (pinned = null), { passive: true });
+
+  function buildSubnavs() {
+    document.querySelectorAll("[data-subnav]").forEach((list) => {
+      const sections = [...byId(list.dataset.subnav).querySelectorAll("[data-section]")];
+      list.replaceChildren(
+        ...sections.map((section) => {
+          const button = h("button", {
+            type: "button",
+            text: section.dataset.section,
+            onclick: () => {
+              pinned = section;
+              markSection(section);
+              section.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+            },
+          });
+          sectionButtons.set(section, button);
+          return h("li", {}, button);
+        }),
+      );
+    });
+  }
+
+  function markSection(section) {
+    sectionButtons.forEach((button, s) => button.classList.toggle("is-active", s === section));
+  }
+
+  function watchSections() {
+    if (!("IntersectionObserver" in window)) return;
+    const visible = new Set();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => (e.isIntersecting ? visible.add(e.target) : visible.delete(e.target)));
+        const candidates = [...visible].filter((s) => !s.closest(".page").hidden);
+        if (pinned && candidates.includes(pinned)) return;
+        // La section active est la plus haute encore visible dans le haut de l'écran.
+        const current = candidates.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+        if (current) markSection(current);
+      },
+      { rootMargin: "-10% 0px -55% 0px" },
+    );
+    sectionButtons.forEach((_, section) => observer.observe(section));
   }
 
   function renderPage(id) {
@@ -406,6 +465,8 @@
     setKpi("data-note", `Médiane ${gb(k.data_median_gb)} · hors ${int(k.unlimited_count)} forfaits illimités (${pct(k.unlimited_share, 0)})`);
     setKpi("price", eur(k.price_mean));
     setKpi("price-note", `Médiane ${eur(k.price_median)}`);
+    setKpi("unlimited", int(k.unlimited_count));
+    setKpi("unlimited-note", `${pct(k.unlimited_share)} des cartes · sans volume chiffré`);
 
     hbars(
       byId("chart-providers"),
@@ -627,6 +688,7 @@
           sortable: true,
           initialSort: { index: 1, dir: "descending" },
           caption: "« Moins cher » : part des forfaits où le fournisseur propose l'offre la moins chère. « Écart marché » : écart moyen au prix médian du même forfait.",
+          rowClass: (r) => (state.provider && r[0] === state.provider ? "is-selected" : null),
         },
       ),
     );
@@ -797,5 +859,7 @@
   state.provider = fromUrl && stats.by_provider[fromUrl] ? fromUrl : "";
   select.value = state.provider;
   select.classList.toggle("is-active", Boolean(state.provider));
+  buildSubnavs();
   showPage(window.location.hash.slice(1));
+  watchSections();
 })();

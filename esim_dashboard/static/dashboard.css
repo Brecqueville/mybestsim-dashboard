@@ -576,7 +576,21 @@ main {
   background: var(--series-2);
 }
 
+/* Zone de survol plus large que le repère lui-même, pour afficher l'infobulle facilement. */
+.range__iqr::after,
+.range__mark::after,
+.range__end::after {
+  content: "";
+  position: absolute;
+  inset: -8px -6px;
+}
+
+.range__mark {
+  z-index: 1;
+}
+
 .range__end {
+  z-index: 1;
   position: absolute;
   top: 3px;
   width: 8px;

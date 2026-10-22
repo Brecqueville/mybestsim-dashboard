@@ -20,7 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--data", type=Path, default=Path("data"), help="dossier des CSV fournisseurs (défaut : data)")
     parser.add_argument("--out", type=Path, default=Path("site"), help="dossier de sortie du site (défaut : site)")
-    parser.add_argument("--repo-url", default=default_repo_url(), help="lien vers le code source, affiché dans le dashboard")
+    parser.add_argument("--repo-url", default=None, help="lien vers le code source à afficher dans le dashboard (aucun par défaut)")
     args = parser.parse_args(argv)
 
     catalog = load_catalog(args.data)
@@ -41,11 +41,6 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print(f"[{check.status}] {check.label} : {check.detail}")
     return 0
-
-
-def default_repo_url() -> str | None:
-    server, repository = os.environ.get("GITHUB_SERVER_URL"), os.environ.get("GITHUB_REPOSITORY")
-    return f"{server}/{repository}" if server and repository else None
 
 
 def _escape_data(text: str) -> str:

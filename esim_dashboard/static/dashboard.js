@@ -543,12 +543,19 @@
   function priceRange(container, k) {
     const span = k.price_max - k.price_min || 1;
     const at = (v) => `${((v - k.price_min) / span) * 100}%`;
+    const minProduct = `${k.price_min_product.name} (${k.price_min_product.provider})`;
+    const maxProduct = `${k.price_max_product.name} (${k.price_max_product.provider})`;
     container.replaceChildren(
       h("span", { class: "range__track" }),
-      h("span", { class: "range__iqr", style: { left: at(k.price_q1), width: `calc(${at(k.price_q3)} - ${at(k.price_q1)})` } }),
-      h("span", { class: "range__mark", style: { left: at(k.price_median) } }),
-      h("span", { class: "range__end", style: { left: "0%" } }),
-      h("span", { class: "range__end", style: { left: "100%" } }),
+      tip(
+        h("span", { class: "range__iqr", style: { left: at(k.price_q1), width: `calc(${at(k.price_q3)} - ${at(k.price_q1)})` } }),
+        `${eur(k.price_q1)} – ${eur(k.price_q3)}`,
+        "La moitié des cartes coûte entre ces deux prix",
+        false,
+      ),
+      tip(h("span", { class: "range__mark", style: { left: at(k.price_median) } }), eur(k.price_median), "Prix médian : la moitié des cartes coûte moins", false),
+      tip(h("span", { class: "range__end", style: { left: "0%" } }), eur(k.price_min), `Le moins cher : ${minProduct}`, false),
+      tip(h("span", { class: "range__end", style: { left: "100%" } }), eur(k.price_max), `Le plus cher : ${maxProduct}`, false),
     );
   }
 
